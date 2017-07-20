@@ -1,0 +1,49 @@
+version: '2'
+services:
+  mongo:
+    image: mongo:3.4.0
+    volumes:
+    - /data/db/mongo/db:/data/db
+    command:
+    - mongod
+    - --auth
+    labels:
+      io.rancher.scheduler.affinity:host_label: db=1
+  redis2:
+    image: redis:3.2.5-alpine
+    command:
+    - redis-server
+    - --appendonly
+    - 'yes'
+    labels:
+      io.rancher.scheduler.affinity:host_label: db=1
+  mysql:
+    image: mysql:5.7.17
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    volumes:
+    - /data/db/mysql/db:/var/lib/mysql
+    labels:
+      io.rancher.scheduler.affinity:host_label: db=1
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_USER: root
+      RABBITMQ_DEFAULT_PASS: root
+    stdin_open: true
+    tty: true
+    labels:
+      io.rancher.container.pull_image: always
+      io.rancher.scheduler.affinity:host_label: db=1
+  redis:
+    image: redis:3.2.5-alpine
+    volumes:
+    - /data/db/redis/data:/data
+    command:
+    - redis-server
+    - --appendonly
+    - 'yes'
+    - --requirepass
+    - root
+    labels:
+      io.rancher.scheduler.affinity:host_label: db=1
